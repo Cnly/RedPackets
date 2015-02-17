@@ -105,7 +105,7 @@ public class Configs
         singleRedPacketSection.set("moneyLeft", totalMoney);
         singleRedPacketSection.set("devide", devide);
         singleRedPacketSection.set("left", devide);
-        singleRedPacketSection.set("taken", Collections.EMPTY_LIST);
+        singleRedPacketSection.set("taken", Collections.<String>emptyList());
         
         this.redPacketConfig.save();
         
@@ -134,7 +134,7 @@ public class Configs
         Set<String> codes = this.redPacketConfig.getConfigurationSection(
                 "redPackets").getKeys(false);
         
-        if (0 == codes.size())
+        if (codes.isEmpty())
             return null;
         
         String[] tmp = new String[codes.size()];
