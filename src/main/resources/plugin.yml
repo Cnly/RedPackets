@@ -1,0 +1,9 @@
+name: ${project.artifactId}
+main: ${project.groupId}.${project.artifactId}.Main
+version: ${project.version}
+author: Cnly
+depend: [Vault]
+
+commands:
+  redpackets:
+    usage: /redpackets
