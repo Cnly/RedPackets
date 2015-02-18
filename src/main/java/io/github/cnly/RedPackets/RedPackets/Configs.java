@@ -26,6 +26,9 @@ public class Configs
     public boolean hasTaken(Player p, String code)
     {
         
+        if (p.hasPermission("RedPackets.unlimitedGetting"))
+            return false;
+        
         UUID pid = p.getUniqueId();
         
         return this.redPacketConfig.getStringList(
@@ -35,19 +38,23 @@ public class Configs
     public double getRedPacket(Player p, String code)
     {
         
+        // Use int to deal with data in the method
+        
         UUID pid = p.getUniqueId();
         
         ConfigurationSection singleRedPacketSection = this.redPacketConfig
                 .getConfigurationSection("redPackets." + code);
         
         int left = singleRedPacketSection.getInt("left") - 1;
-        double totalMoney = singleRedPacketSection.getDouble("total");
-        double devide = singleRedPacketSection.getDouble("devide");
-        double moneyLeft = singleRedPacketSection.getDouble("moneyLeft");
-        double moneyGet = 0;
+        int totalMoney = doubleToInt(singleRedPacketSection.getDouble("total"));
+        int devide = (int)singleRedPacketSection.getDouble("devide");
+        int moneyLeft = doubleToInt(singleRedPacketSection
+                .getDouble("moneyLeft"));
+        int moneyGet = 0;
+        int avgMoney = totalMoney / devide;
         Random r = new Random();
         
-        if (0 >= left)
+        if (0 >= left || avgMoney > moneyLeft)
         {
             
             moneyGet = moneyLeft;
@@ -59,22 +66,24 @@ public class Configs
         else
         {
             
-            double avgMoney = totalMoney / devide;
             do
             {
                 
                 if (r.nextInt(10) < 5)
-                    moneyGet = avgMoney - (r.nextDouble() * 20);
+                    moneyGet = avgMoney - (r.nextInt(avgMoney / 2));
                 else
-                    moneyGet = avgMoney + (r.nextDouble() * 20);
+                    moneyGet = avgMoney + (r.nextInt(avgMoney / 2));
                 
             }
             while (moneyLeft - moneyGet < 0 || moneyGet <= 0);
             
+            if (moneyGet < 0)
+                moneyGet = 0;
+            
             moneyLeft -= moneyGet;
             
             singleRedPacketSection.set("left", left);
-            singleRedPacketSection.set("moneyLeft", moneyLeft);
+            singleRedPacketSection.set("moneyLeft", intToDouble(moneyLeft));
             this.redPacketConfig.addToList("redPackets." + code + ".taken",
                     pid.toString());
             
@@ -82,7 +91,7 @@ public class Configs
         
         this.redPacketConfig.save();
         
-        return moneyGet;
+        return intToDouble(moneyGet);
     }
     
     public String saveRedPacket(String owner, double totalMoney, double devide)
@@ -141,4 +150,15 @@ public class Configs
         
         return codes.toArray(tmp)[new Random().nextInt(codes.size())];
     }
+    
+    private static double intToDouble(int i)
+    {
+        return ((double)i) / 100;
+    }
+    
+    private static int doubleToInt(double d)
+    {
+        return (int)(d * 100);
+    }
+    
 }
